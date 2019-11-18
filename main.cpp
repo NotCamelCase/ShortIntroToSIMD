@@ -31,8 +31,7 @@ void ComputeResultsScalar(const int32_t* __restrict pAValues, const int32_t* __r
 
 bool ValidateOutput(int32_t* pResultsSIMD, int32_t* pResultsScalar);
 
-// Aligned memory aligned on MSVC
-
+// Allocate memory aligned to g_scSIMDDataAlignment boundary
 #ifdef _MSC_VER
 #define ALIGNED_ALLOC(size, type) (reinterpret_cast<type*>(_aligned_malloc(size * sizeof(type), g_scSIMDDataAlignment)))
 #define ALIGNED_FREE(ptr) _aligned_free(ptr)
