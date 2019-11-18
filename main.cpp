@@ -14,8 +14,9 @@
 // into the output array using SIMD instructions
 
 // Number of lanes in the SIMD instruction set that's in use
-// 4 for SSE4 (128 / 32)
-// 8 for AVX  (256 / 32)
+// 4 for SSE     (128 / 32)
+// 8 for AVX     (256 / 32)
+// 16 for AVX512 (512 / 32)
 static constexpr auto   g_scSIMDWidth = 4u;
 
 // 16-byte alignment for SSE, 32-byte for AVX is required!
@@ -24,20 +25,20 @@ static constexpr auto   g_scSIMDDataAlignment = 16u;
 // Input size
 static auto             g_sNumInput = 1'000'000u;
 
-void RandomizeInputData(int32_t* __restrict pAValues, int32_t* __restrict pXValues, int32_t* __restrict pBValues);
+void RandomizeInputData(int32_t* pAValues, int32_t* pXValues, int32_t* pBValues);
 
 void ComputeResultsSIMD4(const int32_t* pAValues, const int32_t* pXValues, const int32_t* pBValues, int32_t* pResults);
-void ComputeResultsScalar(const int32_t* __restrict pAValues, const int32_t* __restrict pXValues, const int32_t* __restrict pBValues, int32_t* __restrict pResults);
+void ComputeResultsScalar(const int32_t* pAValues, const int32_t* pXValues, const int32_t* pBValues, int32_t* pResults);
 
 bool ValidateOutput(int32_t* pResultsSIMD, int32_t* pResultsScalar);
 
 // Allocate memory aligned to g_scSIMDDataAlignment boundary
 #ifdef _MSC_VER
-#define ALIGNED_ALLOC(size, type) (reinterpret_cast<type*>(_aligned_malloc(size * sizeof(type), g_scSIMDDataAlignment)))
-#define ALIGNED_FREE(ptr) _aligned_free(ptr)
+    #define ALIGNED_ALLOC(size, type) (reinterpret_cast<type*>(_aligned_malloc(size * sizeof(type), g_scSIMDDataAlignment)))
+    #define ALIGNED_FREE(ptr) _aligned_free(ptr)
 #else
-#define ALIGNED_ALLOC(size, type) (reinterpret_cast<type*>(aligned_alloc(g_scSIMDDataAlignment, size * sizeof(type))))
-#define ALIGNED_FREE(ptr) free(ptr)
+    #define ALIGNED_ALLOC(size, type) (reinterpret_cast<type*>(aligned_alloc(g_scSIMDDataAlignment, size * sizeof(type))))
+    #define ALIGNED_FREE(ptr) free(ptr)
 #endif
 
 int main(int argc, char* pArgv[])
@@ -106,9 +107,9 @@ int main(int argc, char* pArgv[])
 
 // Fill input data with random values to ensure correctness
 void RandomizeInputData(
-    int32_t* __restrict pAValues,
-    int32_t* __restrict pXValues,
-    int32_t* __restrict pBValues)
+    int32_t* pAValues,
+    int32_t* pXValues,
+    int32_t* pBValues)
 {
     int32_t minRand = INT32_MIN;
     int32_t maxRand = INT32_MAX;
@@ -183,10 +184,10 @@ void ComputeResultsSIMD4(
 
 // Calculate results using scalar code
 void ComputeResultsScalar(
-    const int32_t* __restrict pAValues,
-    const int32_t* __restrict pXValues,
-    const int32_t* __restrict pBValues,
-    int32_t* __restrict pResults)
+    const int32_t* pAValues,
+    const int32_t* pXValues,
+    const int32_t* pBValues,
+    int32_t* pResults)
 {
     // y = a * x + b
     // r = y > 0 ? 1 : (y = 0 ? 0 : -1)
